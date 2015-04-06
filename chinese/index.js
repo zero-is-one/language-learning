@@ -8,74 +8,53 @@ fs.readFile(file, 'utf8', function (err, data) {
   }
  
   data = JSON.parse(data);
- 
-  
-  var deadcount = 0
 
   for (var i = 0; i < data.length; i++) {
+    var text = ''
+    var vocab = data[i].vocab
+    for (var j = 0; j < vocab.length; j++) {
+      text += vocab[j].simplified + "," + vocab[j].definitions + "\n"
+    };
 
+    fs.writeFile("./csv/"+pad(i, 4)+". " + data[i].title+".csv", text, function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log("The file was saved!");
+        }
+    }); 
 
+    fs.writeFile("./summary/chinese/"+pad(i, 4)+". " + data[i].title+".txt", data[i].chineseText, function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log("The file was saved!");
+        }
+    }); 
 
-    var unit = data[i]
-
-    var chinese = unit.chineseText.split("。")
-    var english = unit.englishText.split("Mr.").join("Mr*").split(".");
-    
-
-    //if (unit.title != "Mr. Wang Works at the University") continue
-    
-    /*
-    if (chinese.length == english.length){
-      console.log("sentance match!", chinese.length, english.length)
-      unit.sentances = {}
-      unit.sentances.english = english
-      unit.sentances.chinese = chinese
-
-    }
-    */
-    
-
-
-      var chinese = trim(unit.chineseText, "\n").split("\n")
-      var english = trim(unit.englishText, "\n").split("\n");
-
-      if (chinese.length == english.length){
-        console.log("PARA match!", chinese.length, english.length)
-        unit.paragraphs = {}
-        unit.paragraphs.english = english
-        unit.paragraphs.chinese = chinese
-
-
-      }else{
-        console.log(":::((( no match!", chinese.length, english.length, unit.title)
-          deadcount++
-      }
-
-      //break
-    
-
-
-    //break
-    //
+    fs.writeFile("./summary/english/"+pad(i, 4)+". " + data[i].title+".txt", data[i].summary + "\n\n ----------- \n\n" + data[i].englishText, function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log("The file was saved!");
+        }
+    });
 
   };
+ 
 
-  console.log("Dead", deadcount)
 
-
-  fs.writeFile("new.json", JSON.stringify(data, null, 2), function(err) {
-      if(err) {
-          console.log(err);
-      } else {
-          console.log("The file was saved!");
-      }
-  }); 
 
 
 
 
 });
 
+
+function pad (str, max) {
+  str = str.toString();
+  return str.length < max ? pad("0" + str, max) : str;
+}
 
 var uniq = function(ary) {
     var prim = {"boolean":{}, "number":{}, "string":{}}, obj = [];
@@ -87,26 +66,3 @@ var uniq = function(ary) {
             obj.indexOf(x) < 0 && obj.push(x);
     });
 }
-
-var trim = (function () {
-    "use strict";
-
-    function escapeRegex(string) {
-        return string.replace(/[\[\](){}?*+\^$\\.|\-]/g, "\\$&");
-    }
-
-    return function trim(str, characters, flags) {
-        flags = flags || "g";
-        if (typeof str !== "string" || typeof characters !== "string" || typeof flags !== "string") {
-            throw new TypeError("argument must be string");
-        }
-
-        if (!/^[gi]*$/.test(flags)) {
-            throw new TypeError("Invalid flags supplied '" + flags.match(new RegExp("[^gi]*")) + "'");
-        }
-
-        characters = escapeRegex(characters);
-
-        return str.replace(new RegExp("^[" + characters + "]+|[" + characters + "]+$", flags), '');
-    };
-}());

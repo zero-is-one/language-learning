@@ -1,0 +1,2 @@
+有面没有口，有脚没有手，虽有四只脚，自己不会走。
+Hint: this is a type of household object.
